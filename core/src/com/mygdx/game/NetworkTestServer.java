@@ -2,12 +2,10 @@ package com.mygdx.game;
 
 import java.io.IOException;
 import java.net.Inet4Address;
-import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
@@ -16,9 +14,7 @@ import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -38,7 +34,7 @@ public class NetworkTestServer implements ApplicationListener {
 	private Kryo kryo;
 	private Label labelDetails;
 	Array<Player> players;
-
+	Table table;
 	@Override
 	public void create() {
 		players = new Array<Player>();
@@ -88,21 +84,17 @@ public class NetworkTestServer implements ApplicationListener {
 		}
 
 		kryo = server.getKryo();
-		kryo.register(String.class);
-		kryo.register(Player.class);
-		kryo.register(PlayerMoveRequest.class);
-		kryo.register(AddPlayerRequest.class);
-		kryo.register(PlayerAddedResponse.class);
-		kryo.register(Vector2.class);
+		Registration.registerClasses(kryo);
 
 		// add the listener
 		server.addListener(new Listener() {
 			public void received(Connection connection, Object object) {
-				System.out.println(object);
+				table.add(new Label(object.toString(), skin));
+				table.row();
+				table.pack();
+				System.out.println("Request: " + object.getClass().toString());
 				if (object instanceof String) {
 					String request = (String) object;
-					System.out.println("Request: " + request);
-
 					String response = "Message Received";
 					server.sendToAllExceptTCP(connection.getID(), request);
 					// Temporary
@@ -126,7 +118,7 @@ public class NetworkTestServer implements ApplicationListener {
 				}
 			}
 		});
-		Table table = new Table();
+		table = new Table();
 		table.add(labelDetails);
 		table.row();
 		table.row();
@@ -149,7 +141,7 @@ public class NetworkTestServer implements ApplicationListener {
 		batch.begin();
 		stage.draw();
 		batch.end();
-		System.out.println(Arrays.toString(server.getConnections()));
+		//System.out.println(Arrays.toString(server.getConnections()));
 	}
 
 	@Override

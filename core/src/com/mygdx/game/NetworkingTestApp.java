@@ -1,5 +1,7 @@
 package com.mygdx.game;
 
+import java.io.IOException;
+
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
@@ -8,8 +10,6 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.glutils.FileTextureData;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -21,17 +21,10 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.IntIntMap;
 import com.badlogic.gdx.utils.ObjectMap;
-import com.esotericsoftware.kryonet.*;
 import com.esotericsoftware.kryo.Kryo;
-import java.io.IOException;
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.List;
+import com.esotericsoftware.kryonet.Client;
+import com.esotericsoftware.kryonet.Connection;
+import com.esotericsoftware.kryonet.Listener;
 
 public class NetworkingTestApp extends InputAdapter implements ApplicationListener {
 	// User input things
@@ -54,6 +47,9 @@ public class NetworkingTestApp extends InputAdapter implements ApplicationListen
 	private int thisPlayerIndex;
 	// Current scene
 	private boolean isConnected = false;
+	// Player connection stuff
+	Player player;
+	AddPlayerRequest connectRequest;
 
 	private void initalizeTextures() {
 		textures = new ObjectMap<String, Texture>();
@@ -107,12 +103,7 @@ public class NetworkingTestApp extends InputAdapter implements ApplicationListen
 		client.start();
 
 		kryoClient = client.getKryo();
-		kryoClient.register(String.class);
-		kryoClient.register(Player.class);
-		kryoClient.register(PlayerMoveRequest.class);
-		kryoClient.register(AddPlayerRequest.class);
-		kryoClient.register(PlayerAddedResponse.class);
-		kryoClient.register(Vector2.class);
+		Registration.registerClasses(kryoClient);
 
 		client.addListener(new Listener() {
 			public void received(Connection connection, Object object) {
@@ -148,15 +139,18 @@ public class NetworkingTestApp extends InputAdapter implements ApplicationListen
 			public void clicked(InputEvent event, float x, float y) {
 				// When the button is clicked, connect to the server specified
 				// by the ip
+				player = new Player("Red.png", -1, 0, 0);
+				connectRequest = new AddPlayerRequest(player);
 				try {
 					client.connect(5000, textIPAddress.getText(), 54555, 54777);
-					Player player = new Player("Red.png", -1, 0, 0);
-					AddPlayerRequest connectRequest = new AddPlayerRequest(player);
-					client.sendTCP(connectRequest);
-					System.out.println("ButtonPressed");
 				} catch (IOException e) {
 					labelMessage.setText("Connection Failed");
-					e.printStackTrace();
+				}
+				try {
+					int i = client.sendTCP(connectRequest);
+					System.out.println("ButtonPressed " + Integer.toString(i));
+				} catch (Exception e) {
+					e.printStackTrace(System.out);
 				}
 			}
 		});
@@ -165,6 +159,7 @@ public class NetworkingTestApp extends InputAdapter implements ApplicationListen
 	@Override
 	public void dispose() {
 		batch.dispose();
+		client.close();
 	}
 
 	@Override
@@ -181,16 +176,16 @@ public class NetworkingTestApp extends InputAdapter implements ApplicationListen
 			stage.draw();
 		}
 		batch.end();
-		if(keys.containsKey(Keys.W)){
+		if (keys.containsKey(Keys.W)) {
 			client.sendTCP(new PlayerMoveRequest(thisPlayerIndex, 0, 5));
 		}
-		if(keys.containsKey(Keys.S)){
+		if (keys.containsKey(Keys.S)) {
 			client.sendTCP(new PlayerMoveRequest(thisPlayerIndex, 0, -5));
 		}
-		if(keys.containsKey(Keys.A)){
+		if (keys.containsKey(Keys.A)) {
 			client.sendTCP(new PlayerMoveRequest(thisPlayerIndex, -5, 0));
 		}
-		if(keys.containsKey(Keys.D)){
+		if (keys.containsKey(Keys.D)) {
 			client.sendTCP(new PlayerMoveRequest(thisPlayerIndex, 5, 0));
 		}
 	}

@@ -1,9 +1,11 @@
 package com.mygdx.game;
 
-import com.badlogic.gdx.graphics.Texture;
+import java.io.Serializable;
 import com.badlogic.gdx.math.Vector2;
 
-public class Player {
+public class Player implements Serializable {
+	private static final long serialVersionUID = -9156551458297513126L;
+
 	private String texture;
 	private int index;
 	private Vector2 location;
@@ -21,9 +23,11 @@ public class Player {
 		this(tex, index);
 		setLocation(loc);
 	}
-	public void translate(Vector2 delta){
+
+	public void translate(Vector2 delta) {
 		location.add(delta);
 	}
+
 	public String getTexture() {
 		return texture;
 	}
@@ -51,8 +55,8 @@ public class Player {
 	public void setLocation(int x, int y) {
 		setLocation(new Vector2(x, y));
 	}
-	
-	public String toString(){
+
+	public String toString() {
 		return ("Player " + index + " at location " + location);
 	}
 }
