@@ -7,6 +7,7 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
@@ -147,6 +148,7 @@ public class NetworkTestServer implements ApplicationListener {
 		batch.begin();
 		stage.draw();
 		batch.end();
+		System.out.println(Arrays.toString(server.getConnections()));
 	}
 
 	@Override
