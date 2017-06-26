@@ -17,6 +17,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -91,6 +92,7 @@ public class NetworkTestServer implements ApplicationListener {
 		kryo.register(PlayerMoveRequest.class);
 		kryo.register(AddPlayerRequest.class);
 		kryo.register(PlayerAddedResponse.class);
+		kryo.register(Vector2.class);
 
 		// add the listener
 		server.addListener(new Listener() {
@@ -111,6 +113,7 @@ public class NetworkTestServer implements ApplicationListener {
 					connection.sendTCP(new PlayerAddedResponse(players.size));
 					players.add(request.player);
 					server.sendToAllTCP(request);
+					System.out.println("Connection Request Recieved");
 				}
 				if (object instanceof PlayerMoveRequest) {
 					PlayerMoveRequest request = (PlayerMoveRequest) object;

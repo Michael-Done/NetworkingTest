@@ -4,31 +4,31 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 
 public class Player {
-	private Texture texture;
+	private String texture;
 	private int index;
 	private Vector2 location;
 
-	public Player(Texture tex, int index) {
+	public Player(String tex, int index) {
 		setTexture(tex);
 		setIndex(index);
 	}
 
-	public Player(Texture tex, int index, int x, int y) {
+	public Player(String tex, int index, int x, int y) {
 		this(tex, index, new Vector2(x, y));
 	}
 
-	public Player(Texture tex, int index, Vector2 loc) {
+	public Player(String tex, int index, Vector2 loc) {
 		this(tex, index);
 		setLocation(loc);
 	}
 	public void translate(Vector2 delta){
 		location.add(delta);
 	}
-	public Texture getTexture() {
+	public String getTexture() {
 		return texture;
 	}
 
-	public void setTexture(Texture texture) {
+	public void setTexture(String texture) {
 		this.texture = texture;
 	}
 

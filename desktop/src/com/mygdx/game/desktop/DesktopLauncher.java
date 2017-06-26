@@ -123,7 +123,7 @@ public class DesktopLauncher implements ActionListener {
 		setup.add(title);
 		resoLabel.setFont(settingFonts);
 		setup.add(Box.createVerticalStrut(60));
-		setup.add(Box.createHorizontalStrut(100));
+		setup.add(Box.createHorizontalStrut(50));
 		setup.add(resoLabel);
 		resolutionSelection.setSelectedIndex(16);
 		setup.add(resolutionSelection);
