@@ -59,7 +59,7 @@ public class NetworkingTestApp extends InputAdapter implements ApplicationListen
 
 	@Override
 	public void create() {
-		players = new Array<Player>();
+		//players = new Array<Player>();
 		camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		batch = new SpriteBatch();
 		// Textures
@@ -126,6 +126,7 @@ public class NetworkingTestApp extends InputAdapter implements ApplicationListen
 				if (object instanceof PlayerAddedResponse) {
 					PlayerAddedResponse response = (PlayerAddedResponse) object;
 					thisPlayerIndex = response.index;
+					players = new Array<Player>(response.currentPlayers);
 					isConnected = true;
 					setInputProcessorToThis();
 					System.out.println("Response Recieved");

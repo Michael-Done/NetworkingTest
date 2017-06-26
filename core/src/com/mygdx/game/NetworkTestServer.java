@@ -89,9 +89,6 @@ public class NetworkTestServer implements ApplicationListener {
 		// add the listener
 		server.addListener(new Listener() {
 			public void received(Connection connection, Object object) {
-				table.add(new Label(object.toString(), skin));
-				table.row();
-				table.pack();
 				System.out.println("Request: " + object.getClass().toString());
 				if (object instanceof String) {
 					String request = (String) object;
@@ -104,7 +101,8 @@ public class NetworkTestServer implements ApplicationListener {
 					AddPlayerRequest request = (AddPlayerRequest) object;
 					System.out.println(request + " connected");
 					request.player.setIndex(players.size);
-					connection.sendTCP(new PlayerAddedResponse(players.size));
+					
+					connection.sendTCP(new PlayerAddedResponse(players.size, players));
 					players.add(request.player);
 					server.sendToAllTCP(request);
 					System.out.println("Connection Request Recieved");
