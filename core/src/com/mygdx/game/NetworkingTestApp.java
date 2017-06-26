@@ -2,14 +2,10 @@ package com.mygdx.game;
 
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Net.Protocol;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.net.ServerSocket;
-import com.badlogic.gdx.net.ServerSocketHints;
-import com.badlogic.gdx.net.Socket;
-import com.badlogic.gdx.net.SocketHints;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -17,16 +13,11 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextArea;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.utils.viewport.Viewport;
+import com.badlogic.gdx.utils.Array;
 import com.esotericsoftware.kryonet.*;
-import com.esotericsoftware.*;
 import com.esotericsoftware.kryo.Kryo;
-
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -45,18 +36,21 @@ public class NetworkingTestApp implements ApplicationListener {
 	private Label labelMessage;
 	private TextButton button;
 	private TextArea textIPAddress;
-	private TextArea textMessage;
+	private Texture red;
+	private Texture green;
 	// Networking things
-	private Server server;
-	private Kryo kryo;
+
 	private Kryo kryoClient;
 	private Client client;
-
+	// Player data
+	Array<Player> players;
 	@Override
 	public void create() {
 		camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		batch = new SpriteBatch();
-
+		// Textures
+		red = new Texture(Gdx.files.internal("Red.png"));
+		green = new Texture(Gdx.files.internal("Green.png"));
 		// Load our UI skin from file. Once again, I used the files included in
 		// the tests.
 		// Make sure default.fnt, default.png, uiskin.[atlas/json/png] are all
@@ -99,7 +93,6 @@ public class NetworkingTestApp implements ApplicationListener {
 		labelMessage = new Label("Hello world", skin);
 		button = new TextButton("Send message", skin);
 		textIPAddress = new TextArea("", skin);
-		textMessage = new TextArea("", skin);
 
 		Table table = new Table();
 		table.add(labelDetails);
@@ -110,39 +103,13 @@ public class NetworkingTestApp implements ApplicationListener {
 		table.row();
 		table.add(textIPAddress).width(400);
 		table.row();
-		table.add(textMessage).width(400);
-		table.row();
 		table.pack();
 		// Add scene to stage
 		stage.addActor(table);
 
 		// Now we create a thread that will listen for incoming socket
 		// connections
-		server = new Server();
-		server.start();
-		try {
-			server.bind(54555, 54777);
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
-
-		kryo = server.getKryo();
-		kryo.register(String.class);
-
-		// add the listener
-		server.addListener(new Listener() {
-			public void received(Connection connection, Object object) {
-				if (object instanceof String) {
-					String request = (String) object;
-					System.out.println("Request: " + request);
-
-					String response = "Message Received";
-					server.sendToAllExceptTCP(connection.getID(), request);
-					// Temporary
-					connection.sendTCP(response);
-				}
-			}
-		});
+		
 
 		client = new Client();
 		client.start();
@@ -176,17 +143,17 @@ public class NetworkingTestApp implements ApplicationListener {
 			public void clicked(InputEvent event, float x, float y) {
 				// When the button is clicked, get the message text or create a
 				// default string value
-				String textToSend = new String();
-				if (textMessage.getText().length() == 0)
-					textToSend = "Doesn't say much but likes clicking buttons";
-				else
-					textToSend = textMessage.getText();
-				try {
-					client.connect(5000, textIPAddress.getText(), 54555, 54777);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-				client.sendTCP(textToSend);
+				// String textToSend = new String();
+				// if (textMessage.getText().length() == 0)
+				// textToSend = "Doesn't say much but likes clicking buttons";
+				// else
+				// textToSend = textMessage.getText();
+				// try {
+				// client.connect(5000, textIPAddress.getText(), 54555, 54777);
+				// } catch (IOException e) {
+				// e.printStackTrace();
+				// }
+				// client.sendTCP(textToSend);
 
 			}
 		});
@@ -195,7 +162,6 @@ public class NetworkingTestApp implements ApplicationListener {
 	@Override
 	public void dispose() {
 		batch.dispose();
-		server.close();
 	}
 
 	@Override
