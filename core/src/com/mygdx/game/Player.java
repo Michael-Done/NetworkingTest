@@ -21,7 +21,9 @@ public class Player {
 		this(tex, index);
 		setLocation(loc);
 	}
-
+	public void translate(Vector2 delta){
+		location.add(delta);
+	}
 	public Texture getTexture() {
 		return texture;
 	}
@@ -48,5 +50,9 @@ public class Player {
 
 	public void setLocation(int x, int y) {
 		setLocation(new Vector2(x, y));
+	}
+	
+	public String toString(){
+		return ("Player " + index + " at location " + location);
 	}
 }

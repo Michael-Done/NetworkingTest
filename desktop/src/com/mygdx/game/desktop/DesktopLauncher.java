@@ -12,12 +12,13 @@ import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 
+import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
+import com.mygdx.game.NetworkTestServer;
 import com.mygdx.game.NetworkingTestApp;
 
-
-public class DesktopLauncher implements ActionListener{
+public class DesktopLauncher implements ActionListener {
 	private static Resolution[] resolutions = { new Resolution(320, 240), new Resolution(640, 480),
 			new Resolution(800, 600), new Resolution(1024, 600), new Resolution(1024, 768), new Resolution(1152, 864),
 			new Resolution(1280, 720), new Resolution(1280, 768), new Resolution(1280, 800), new Resolution(1280, 1024),
@@ -31,7 +32,7 @@ public class DesktopLauncher implements ActionListener{
 	private static boolean vsync = true;
 	private static boolean fullscreen = false;
 	private static JComboBox<Resolution> resolutionSelection = new JComboBox<Resolution>(resolutions);
-	private static JComboBox<String> vSyncSelection = new JComboBox<String>(new String[] { "ON", "OFF" });
+	private static JComboBox<String> vSyncSelection = new JComboBox<String>(new String[] { "CLIENT", "SERVER" });
 	private static JComboBox<String> fullscreenSelection = new JComboBox<String>(
 			new String[] { "Fullscreen", "Windowed" });
 
@@ -111,7 +112,7 @@ public class DesktopLauncher implements ActionListener{
 		Font settingFonts = new Font("Agency FB", Font.PLAIN, 20);
 		JLabel title = new JLabel("Inital Settings Menu: ");
 		JLabel resoLabel = new JLabel("Resolution: ");
-		JLabel vSyncLabel = new JLabel("VSync: ");
+		JLabel vSyncLabel = new JLabel("App: ");
 		JLabel fullScreenLabel = new JLabel("    Screen: ");
 
 		// Frame Setup
@@ -171,20 +172,25 @@ public class DesktopLauncher implements ActionListener{
 		width = (int) (((Resolution) (resolutionSelection.getSelectedItem())).getX());
 		height = (int) (((Resolution) (resolutionSelection.getSelectedItem())).getY());
 		fullscreen = fullscreenSelection.getSelectedItem().equals("Fullscreen");
-		vsync = vSyncSelection.getSelectedItem().equals("ON");
+		boolean server = vSyncSelection.getSelectedItem().equals("SERVER");
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
-		NetworkingTestApp game = new NetworkingTestApp();
+		ApplicationListener game;
+		if (!server) {
+			game = new NetworkingTestApp();
+		} else {
+			game = new NetworkTestServer();
+		}
 		// Testing purposes
-		//---------------------------
+		// ---------------------------
 		fullscreen = false;
-		width = 1980/2;
-		height = 1080/2;
+		width = 1980 / 2;
+		height = 1080 / 2;
 		// --------------------------
 		config.title = "Networking Test 1.0";
 		config.width = width;
 		config.height = height;
 		config.fullscreen = fullscreen;
-		config.vSyncEnabled = vsync;
+		config.vSyncEnabled = true;
 		config.x = -1;
 		config.y = -1;
 		new LwjglApplication(game, config);
@@ -199,7 +205,6 @@ public class DesktopLauncher implements ActionListener{
 	 *            - The arguments passed from the command line.
 	 */
 	public static void main(String[] args) {
-		new DesktopLauncher().actionPerformed(null);
-		//gameLauncher();
+		gameLauncher();
 	}
 }

@@ -44,8 +44,11 @@ public class NetworkingTestApp implements ApplicationListener {
 	private Client client;
 	// Player data
 	Array<Player> players;
+	private int thisPlayerIndex;
+
 	@Override
 	public void create() {
+		players = new Array<Player>();
 		camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		batch = new SpriteBatch();
 		// Textures
@@ -66,30 +69,7 @@ public class NetworkingTestApp implements ApplicationListener {
 		// example
 		// one per NIC, one per active wireless and the loopback
 		// In this case we only care about IPv4 address ( x.x.x.x format )
-		List<String> addresses = new ArrayList<String>();
-		try {
-			Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
-			for (NetworkInterface ni : Collections.list(interfaces)) {
-				for (InetAddress address : Collections.list(ni.getInetAddresses())) {
-					if (address instanceof Inet4Address) {
-						addresses.add(address.getHostAddress());
-					}
-				}
-			}
-		} catch (SocketException e) {
-			e.printStackTrace();
-		}
 
-		// Print the contents of our array to a string. Yeah, should have used
-		// StringBuilder
-		String ipAddress = new String("");
-		for (String str : addresses) {
-			ipAddress = ipAddress + str + "\n";
-		}
-
-		// Now setup our scene UI
-		// Create our controls
-		labelDetails = new Label(ipAddress, skin);
 		labelMessage = new Label("Hello world", skin);
 		button = new TextButton("Send message", skin);
 		textIPAddress = new TextArea("", skin);
@@ -109,7 +89,6 @@ public class NetworkingTestApp implements ApplicationListener {
 
 		// Now we create a thread that will listen for incoming socket
 		// connections
-		
 
 		client = new Client();
 		client.start();
@@ -121,9 +100,14 @@ public class NetworkingTestApp implements ApplicationListener {
 
 		kryoClient = client.getKryo();
 		kryoClient.register(String.class);
+		kryoClient.register(Player.class);
+		kryoClient.register(PlayerMoveRequest.class);
+		kryoClient.register(AddPlayerRequest.class);
+		kryoClient.register(PlayerAddedResponse.class);
 
-		String request = "Initial Request";
-		client.sendTCP(request);
+		Player player = new Player(red, -1, 0, 0);
+		AddPlayerRequest connectRequest = new AddPlayerRequest(player);
+		client.sendTCP(connectRequest);
 
 		client.addListener(new Listener() {
 			public void received(Connection connection, Object object) {
@@ -133,6 +117,19 @@ public class NetworkingTestApp implements ApplicationListener {
 					if (!response.equals("Message Received")) {
 						labelMessage.setText(response);
 					}
+				}
+				if (object instanceof AddPlayerRequest) {
+					AddPlayerRequest request = (AddPlayerRequest) object;
+					players.add(request.player);
+					assert (request.player.getIndex() == players.size);
+				}
+				if (object instanceof PlayerMoveRequest) {
+					PlayerMoveRequest request = (PlayerMoveRequest) object;
+					players.get(request.index).translate(request.delta);
+				}
+				if (object instanceof PlayerAddedResponse) {
+					PlayerAddedResponse response = (PlayerAddedResponse) object;
+					thisPlayerIndex = response.index;
 				}
 			}
 		});
@@ -170,7 +167,10 @@ public class NetworkingTestApp implements ApplicationListener {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		batch.setProjectionMatrix(camera.combined);
 		batch.begin();
-		stage.draw();
+		for (Player p : players) {
+			batch.draw(p.getTexture(), p.getLocation().x, p.getLocation().y);
+		}
+		// stage.draw();
 		batch.end();
 	}
 
