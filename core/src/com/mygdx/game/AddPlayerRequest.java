@@ -6,6 +6,6 @@ public class AddPlayerRequest {
 		player = p;
 	}
 	public String toString(){
-		return player.toString();
+		return "Request to add: " + player.toString();
 	}
 }

@@ -98,6 +98,7 @@ public class NetworkTestServer implements ApplicationListener {
 		// add the listener
 		server.addListener(new Listener() {
 			public void received(Connection connection, Object object) {
+				System.out.println(object);
 				if (object instanceof String) {
 					String request = (String) object;
 					System.out.println("Request: " + request);
