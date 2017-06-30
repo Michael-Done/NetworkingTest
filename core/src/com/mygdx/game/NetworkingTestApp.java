@@ -98,7 +98,6 @@ public class NetworkingTestApp extends InputAdapter implements ApplicationListen
 		stage.addActor(table);
 
 		// the client that will connect to the server
-
 		client = new Client();
 		client.start();
 

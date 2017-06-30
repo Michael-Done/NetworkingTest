@@ -13,8 +13,6 @@ import java.util.List;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -26,8 +24,6 @@ import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
 
 public class NetworkTestServer implements ApplicationListener {
-	private OrthographicCamera camera;
-	private SpriteBatch batch;
 	private Skin skin;
 	private Stage stage;
 	private Server server;
@@ -38,8 +34,6 @@ public class NetworkTestServer implements ApplicationListener {
 	@Override
 	public void create() {
 		players = new Array<Player>();
-		camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		batch = new SpriteBatch();
 		// Load our UI skin from file. Once again, I used the files included in
 		// the tests.
 		// Make sure default.fnt, default.png, uiskin.[atlas/json/png] are all
@@ -119,7 +113,6 @@ public class NetworkTestServer implements ApplicationListener {
 		table = new Table();
 		table.add(labelDetails);
 		table.row();
-		table.row();
 		table.pack();
 		// Add scene to stage
 		stage.addActor(table);
@@ -135,11 +128,7 @@ public class NetworkTestServer implements ApplicationListener {
 	public void render() {
 		Gdx.gl.glClearColor(0.5f, 0.5f, 0.5f, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-		batch.setProjectionMatrix(camera.combined);
-		batch.begin();
 		stage.draw();
-		batch.end();
-		//System.out.println(Arrays.toString(server.getConnections()));
 	}
 
 	@Override
@@ -155,7 +144,6 @@ public class NetworkTestServer implements ApplicationListener {
 
 	@Override
 	public void dispose() {
-		batch.dispose();
 		server.close();
 	}
 
